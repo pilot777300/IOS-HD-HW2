@@ -12,6 +12,10 @@ class FeedViewController: UIViewController {
     var coordinator: FeedCoordinator?
     
     var blinkStatus = false
+    var  t = NetworkService()
+   // var y = NetworkService()
+    
+   // var w: String = ""
     
     private lazy var checkGuessButton: CustomButton = {
         let button = CustomButton(buttonTitle: "ПРОВЕРИТЬ", buttonColor: .systemBlue) { [unowned self]  in
@@ -42,6 +46,30 @@ class FeedViewController: UIViewController {
         return lbl
     }()
     
+    private lazy var textFromNetwork: UILabel = {
+    let txtLbl = UILabel()
+        txtLbl.backgroundColor = .white
+        txtLbl.layer.cornerRadius = 30
+        txtLbl.text = ""
+        txtLbl.font = UIFont.boldSystemFont(ofSize: 16)
+        txtLbl.textColor = .black
+        txtLbl.textAlignment = .center
+        txtLbl.translatesAutoresizingMaskIntoConstraints = false
+      return txtLbl
+    }()
+    
+    private lazy var planetLbl: UILabel = {
+      let pLbl = UILabel()
+        pLbl.backgroundColor = .white
+        pLbl.layer.cornerRadius = 30
+        pLbl.text = ""
+        pLbl.font = UIFont.boldSystemFont(ofSize: 16)
+        pLbl.textColor = .black
+        pLbl.textAlignment = .center
+        pLbl.translatesAutoresizingMaskIntoConstraints = false
+       return pLbl
+    }()
+    
     func setConstraints() {
         let safeArea = view.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
@@ -58,7 +86,17 @@ class FeedViewController: UIViewController {
             guessColor.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 30),
             guessColor.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 30),
             guessColor.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -30),
-            guessColor.heightAnchor.constraint(equalToConstant: 150)
+            guessColor.heightAnchor.constraint(equalToConstant: 150),
+            
+            textFromNetwork.topAnchor.constraint(equalTo: checkGuessButton.bottomAnchor, constant: 15),
+            textFromNetwork.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
+            textFromNetwork.widthAnchor.constraint(equalToConstant: 300),
+            textFromNetwork.heightAnchor.constraint(equalToConstant: 50),
+            
+            planetLbl.topAnchor.constraint(equalTo: textFromNetwork.bottomAnchor, constant: 15),
+            planetLbl.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
+            planetLbl.widthAnchor.constraint(equalToConstant: 300),
+            planetLbl.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
@@ -69,7 +107,11 @@ class FeedViewController: UIViewController {
         self.view.addSubview(checkGuessButton)
         self.view.addSubview(textfield)
         self.view.addSubview(guessColor)
+        self.view.addSubview(textFromNetwork)
+        self.view.addSubview(planetLbl)
         setConstraints()
+        sendDataToLbl()
+        sendDataToOrbitPeriod()
             }
             
          private func buttonAction() {
@@ -106,9 +148,29 @@ class FeedViewController: UIViewController {
                     blinkStatus = false
                 }
             }
-        }
-            
+    
+    func sendDataToLbl () {
 
+        let data = NetworkService()
+        data.request {
+                    title in
+                    DispatchQueue.main.async {
+                        self.textFromNetwork.text = title
+                    }
+                }
+            }
+    
+    func sendDataToOrbitPeriod() {
+        let data = NetworkService()
+        data.requestForPlanet {
+            planet in
+            DispatchQueue.main.async {
+                self.planetLbl.text = planet?.orbital_period
+                
+            }
+        }
+    }
+        }
     
     
 

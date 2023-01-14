@@ -7,67 +7,114 @@
 
 import Foundation
 
-enum AppConfiguration {
+struct Planet: Decodable {
     
-    case one(String)
-    case two( String)
-    case three(String)
+    var name: String
+    var orbital_period: String
+    var terrain: String
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case name, orbital_period = "orbitalPeriod", terrain
+    }
 }
+
+
+
+struct Data {
+
+    var userId: Int
+    var id: Int
+    var title: String
+    var completed: Bool
+}
+
+
 
 struct NetworkService {
     
-    static func request( for configuration: AppConfiguration) {
-      
-        var urlStr = ""
+     func request( completion: ((_ title: String?)-> Void)?) {
 
-        switch  configuration {
-        case .one("https://swapi.dev/api/starships/3"):
-            urlStr = "https://swapi.dev/api/starships/3"
-           
-            
-        case .two( "https://swapi.dev/api/starships/8"):
-            urlStr = "https://swapi.dev/api/starships/8"
-        
-        case .three( "https://swapi.dev/api/planets/5"):
-            urlStr = "https://swapi.dev/api/planets/5"
-        default: break
-        }
-        
-        let url: URL = URL(string: urlStr)!
-        let request = URLRequest(url: url)
         let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: request) { dat, responce, error in
+        let task = session.dataTask(with:URL(string: "https://jsonplaceholder.typicode.com/todos/1")!) { dat, responce, error in
             
             if let error = error {
                 print(error.localizedDescription)
+                completion?(nil)
                 return
             }
             
             if  (responce as! HTTPURLResponse).statusCode != 200 {
                 print("STATUS CODE != 200, Status code = \((responce as! HTTPURLResponse).statusCode)")
+                completion?(nil)
                 return
             }
             
             guard let dat = dat else {
                 print("NO DATA")
+                completion?(nil)
+                
                 return
             }
             
             do {
-                let answer = try JSONSerialization.jsonObject(with: dat) as? [String: Any]
-                if let data = answer {
-                print(data as AnyObject)
+
+                
+                let answer = try JSONSerialization.jsonObject(with: dat, options: [.allowFragments])  as? [String: Any]
+
+                if let title = answer?["title"] as? String {
+                    completion?(title)
+                    print(title)
+
+                    return
+                    
                 }
             } catch {
                 print(error.localizedDescription)
             }
-        print("--------------")
-           print("Responce status code = \((responce as! HTTPURLResponse).statusCode)")
-            print((responce as! HTTPURLResponse).allHeaderFields)
+      completion?(nil)
         }
         task.resume()
     }
+    
+    func requestForPlanet(completion: ((_ planet: Planet?) -> Void)?) {
+        
+        let session = URLSession(configuration: .default)
+        let task = session.dataTask(with: URL(string: "https://swapi.dev/api/planets/1")!) { data,
+            responce, error in
+            
+            if let error = error {
+                print("ERRor block1 \(error.localizedDescription)")
+                return
+            }
+            
+            if (responce as! HTTPURLResponse).statusCode != 200 {
+                print("Status Code Ne = 200")
+                return
+            }
+            guard let data = data else {
+                print("NO DATA")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let planet =  try decoder.decode(Planet.self, from: data)
+                completion?(planet)
+                print(planet)
+            return
+            } catch {
+                print("ERROR BLOCK 2\(error.localizedDescription)")
+            }
+            
+            completion?(nil)
+        }
+        task.resume()
+        
+    }
 }
+
 
 
 

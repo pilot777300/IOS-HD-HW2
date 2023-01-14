@@ -15,9 +15,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         
-        let appConfiguration: AppConfiguration = AppConfiguration.one("https://swapi.dev/api/starships/3")
+      //  let req = NetworkService.request()
+        //  let appConfiguration: AppConfiguration = AppConfiguration.one("https://swapi.dev/api/starships/3")
         
-        let appconf = NetworkService.request(for: appConfiguration)
+       // let appconf = NetworkService.request(for: appConfiguration)
         
        
         let factory = MyLoginFactory()
